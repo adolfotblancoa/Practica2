@@ -7,14 +7,15 @@ import java.io.IOException;
 public class Tablero{
     private static int DIMENSION = 30;
     // Matriz que representa el estado actual.
-    int[][] estadoActual; {   
+    public static void main(String []args){
+    int[][] estadoActual;
     try{
-        BufferedReader br = new BufferedReader(new FileReader("matriz.txt"));
+        BufferedReader br = new BufferedReader(new FileReader("C:/Users/adolf/OneDrive/Desktop/CEU/Programacion II/Practica2/src/dominio/matriz.txt"));
         estadoActual = new int[DIMENSION][DIMENSION];
         String linea  = br.readLine();
         int fila = 0; //Para recorrer las filas de la matriz
 			while(linea != null) {
-                String[] numeros = linea.split(" ");
+                String[] numeros = linea.split("");
                 for(int i = 0; i < numeros.length; i++) 
                     estadoActual[fila][i] = Integer.parseInt(numeros[i]);
                 fila++;
