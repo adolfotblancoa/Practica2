@@ -4,7 +4,6 @@ import java.util.concurrent.TimeUnit;
 import java.lang.InterruptedException;
 
 public class Principal {
-/*
     public static void main(String[] args){
     try{
     Tablero tablero = new Tablero();
@@ -31,5 +30,5 @@ public class Principal {
         System.out.println(e);
         }   
     }
- */
+ 
 }

@@ -9,38 +9,11 @@ import java.io.FileWriter;
 
 public class Tablero{
     private static int DIMENSION = 30;
-    // Matriz que representa el estado actual.
-    public static void main(String []args){
+    int[][] estadoActual = new int[DIMENSION+2][DIMENSION+2];
+    int[][] estadoSiguiente = new int[DIMENSION+2][DIMENSION+2];
 
-        int[][] matriz = new int[DIMENSION][DIMENSION];
+    public void leerEstadoActual(){
 
-        try (FileWriter fw = new FileWriter("C:/Users/adolf/OneDrive/Desktop/CEU/Programacion II/Practica2/src/dominio/matriz.txt");
-             BufferedWriter bw = new BufferedWriter(fw)) {
-                
-                Random random = new Random();
-                for (int i = 0; i < matriz.length; i++) {
-                    for (int j = 0; j < matriz.length; j++) {
-                        matriz[i][j] = random.nextInt(2);
-                    }
-                }
-            
-            for (int i = 0; i < matriz.length; i++) {
-                for (int j = 0; j < matriz[0].length; j++) {
-                    matriz[i][j] = random.nextInt(2);
-                    bw.write(matriz[i][j] + "");
-                }
-                bw.newLine();
-            }
-        
-            System.out.println("La matriz se ha escrito en el archivo correctamente.");
-
-        }catch (IOException e) {
-            System.err.println("Error al escribir en el archivo: " + e.getMessage());
-        }
-
-
-
-    int[][] estadoActual;
     try{
         BufferedReader br = new BufferedReader(new FileReader("C:/Users/adolf/OneDrive/Desktop/CEU/Programacion II/Practica2/src/dominio/matriz.txt"));
         estadoActual = new int[DIMENSION][DIMENSION];
@@ -54,12 +27,7 @@ public class Tablero{
                 linea = br.readLine();
             }
             br.close();
-            //Mostramos la matriz leida
-            for(int i=0; i < DIMENSION; i++){
-                for(int j=0; j < DIMENSION; j++)
-                    System.out.print(estadoActual[i][j] + " ");
-                System.out.println();
-            }
+            
     }catch(FileNotFoundException e){
         System.out.println("No se ha encontrado el archivo");
         e.printStackTrace();
@@ -72,42 +40,101 @@ public class Tablero{
         }
 
  }
+
+    public void generarEstadoActualPorMontecarlo(){
+        try (FileWriter fw = new FileWriter("C:/Users/adolf/OneDrive/Desktop/CEU/Programacion II/Practica2/src/dominio/matriz.txt");
+             BufferedWriter bw = new BufferedWriter(fw)) {
+                
+                Random random = new Random();
+                for (int i = 0; i < estadoActual.length; i++) {
+                    for (int j = 0; j < estadoActual.length; j++) {
+                        estadoActual[i][j] = random.nextInt(2);
+                    }
+                }
+            
+            for (int i = 0; i < estadoActual.length; i++) {
+                for (int j = 0; j < estadoActual[0].length; j++) {
+                    estadoActual[i][j] = random.nextInt(2);
+                    bw.write(estadoActual[i][j] + "");
+                }
+                bw.newLine();
+            }
+
+        }catch (IOException e) {
+            System.err.println("Error al escribir en el archivo: " + e.getMessage());
+        }
+    }
+
+    public void transitarAlEstadoSiguiente(){
+        for(int i = 1; i <= DIMENSION; i++){
+            for(int j = 1; j <= DIMENSION; j++){
+                // celula de estado actual
+                int cel = estadoActual[i][j];
+                // vecinos 
+                int vecinos = estadoSiguiente[i][j + 1] + estadoSiguiente[i][j - 1] + estadoSiguiente[i - 1][j] + estadoSiguiente[i + 1][j] + estadoSiguiente[i + 1][j + 1] + estadoSiguiente[i + 1][j - 1] + estadoSiguiente[i - 1][j + 1] + estadoSiguiente[i - 1][j - 1];
+                // celuola estado siguiente
+                // regla a)
+                if(cel == 1 && (vecinos == 2 || vecinos == 3)){
+                    estadoSiguiente[i][j] = 1;
+                // regla b)
+                } else if(cel == 0 && vecinos == 3){
+                    estadoSiguiente[i][j] = 1;
+                // regla c)
+                } else{
+                    estadoSiguiente[i][j] = 0;
+                }
+            }
+        }
+    }
+        
+
+    public String toString(){
+        String cadena = "";
+        for(int i = 0; i < DIMENSION; i++){
+            for(int j = 0; j < DIMENSION; j++){
+             if(estadoActual[i][j] == 1){
+                cadena += "1";
+            } else{
+                cadena += "0";
+                }
+            cadena += "";
+            }
+        }
+        return cadena;
+    }
 }
+
 
 
 /*  
-    // Devuelve la siguiente generación del tablero según las reglas del juego de la vida
-    public static int[][] getNextGeneration(int[][] board) {
-        int[][] newBoard = new int[30][30];
-        for (int i = 0; i < 30; i++) {
-            for (int j = 0; j < 30; j++) {
-                int aliveNeighbors = countAliveNeighbors(board, i, j);
-                if (board[i][j] == 1 && (aliveNeighbors == 2 || aliveNeighbors == 3)) {
-                    newBoard[i][j] = 1; // la célula sigue viva
-                } else if (board[i][j] == 0 && aliveNeighbors == 3) {
-                    newBoard[i][j] = 1; // la célula nace
-                } else {
-                    newBoard[i][j] = 0; // la célula muere
-                }
+for(int i = 0; i < estadoActual.length; i++){
+            for(int j = 0; j < estadoActual[0].length; j++){
+                int vecinosVivos = contarVecinosVivos(i, j);
+                if(estadoActual[i][j] == 1 && (vecinosVivos == 2 || vecinosVivos == 3))
+                    estadoSiguiente[i][j] = 1;
+                else if(estadoActual[i][j] == 0 && vecinosVivos == 3)
+                    estadoSiguiente[i][j] = 1;
+                else
+                    estadoSiguiente[i][j] = 0;
             }
         }
-        return newBoard;
+        estadoActual = estadoSiguiente;
+        estadoSiguiente = new int[DIMENSION][DIMENSION];
     }
 
-    // Cuenta el número de células vivas alrededor de una célula dada
-    public static int countAliveNeighbors(int[][] board, int row, int col) {
-        int count = 0;
-        for (int i = -1; i <= 1; i++) {
-            for (int j = -1; j <= 1; j++) {
-                int r = row + i;
-                int c = col + j;
-                if (r >= 0 && r < 30 && c >= 0 && c < 30 && !(i == 0 && j == 0)) {
-                    count += board[r][c];
+    public int contarVecinosVivos(int fila, int columna){
+        int vecinosVivos = 0;
+        for(int i = -1; i <= 1; i++){
+            for(int j = -1; j <= 1; j++){
+                int filaVecino = fila + i;
+                int columnaVecino = columna + j;
+                if(filaVecino >= 0 && filaVecino < DIMENSION && columnaVecino >= 0 && columnaVecino < DIMENSION && !(i == 0 && j == 0)){
+                    vecinosVivos += estadoActual[filaVecino][columnaVecino];
                 }
             }
         }
-        return count;
+        return vecinosVivos;
     }
-}
+
 
  */
