@@ -4,8 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Random;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 
 public class Tablero{
     private static int DIMENSION = 30;
@@ -15,18 +13,16 @@ public class Tablero{
     public void leerEstadoActual(){
 
     try{
-        BufferedReader br = new BufferedReader(new FileReader("C:/Users/adolf/OneDrive/Desktop/CEU/Programacion II/Practica2/src/dominio/matriz.txt"));
-        estadoActual = new int[DIMENSION][DIMENSION];
-        String linea  = br.readLine();
-        int fila = 0; //Para recorrer las filas de la matriz
-			while(linea != null) {
-                String[] numeros = linea.split("");
-                for(int i = 0; i < numeros.length; i++) 
-                    estadoActual[fila][i] = Integer.parseInt(numeros[i]);
-                fila++;
-                linea = br.readLine();
+        BufferedReader fr1 = new BufferedReader(new FileReader("C:/Users/adolf/OneDrive/Desktop/CEU/Programacion II/Practica2/src/dominio/matriz.txt"));
+        estadoActual = new int[DIMENSION+2][DIMENSION+2];
+         BufferedReader br = new BufferedReader(fr1);
+           for(int i = 1; i <= DIMENSION; i++){
+            for(int j = 1; j <= DIMENSION; j++){
+            estadoActual[i][j] = br.read() == '0'?0:1;
             }
-            br.close();
+            br.read();
+           }
+           br.close(); 
             
     }catch(FileNotFoundException e){
         System.out.println("No se ha encontrado el archivo");
@@ -39,29 +35,33 @@ public class Tablero{
         ex2.printStackTrace();
         }
 
- }
+    }
+
+
+    public int numRandom(){
+        Random r = new Random();
+        int num = r.nextInt(2);
+        return num;
+    }
 
     public void generarEstadoActualPorMontecarlo(){
-        try (FileWriter fw = new FileWriter("C:/Users/adolf/OneDrive/Desktop/CEU/Programacion II/Practica2/src/dominio/matriz.txt");
-             BufferedWriter bw = new BufferedWriter(fw)) {
-                
-                Random random = new Random();
+                for(int i = 0; i < DIMENSION + 2; i++){
+                    estadoActual[i][0] = 0;
+                        estadoActual[i][DIMENSION + 1] = 0;
+                        estadoActual[0][i] = 0; 
+                        estadoActual[DIMENSION][0] = 0;
+                }
+
                 for (int i = 0; i < estadoActual.length; i++) {
                     for (int j = 0; j < estadoActual.length; j++) {
-                        estadoActual[i][j] = random.nextInt(2);
+                        estadoActual[i][j] = numRandom();
                     }
                 }
             
             for (int i = 0; i < estadoActual.length; i++) {
                 for (int j = 0; j < estadoActual[0].length; j++) {
-                    estadoActual[i][j] = random.nextInt(2);
-                    bw.write(estadoActual[i][j] + "");
-                }
-                bw.newLine();
+                    estadoActual[i][j] = numRandom();
             }
-
-        }catch (IOException e) {
-            System.err.println("Error al escribir en el archivo: " + e.getMessage());
         }
     }
 
@@ -72,14 +72,13 @@ public class Tablero{
                 int cel = estadoActual[i][j];
                 // vecinos 
                 int vecinos = estadoSiguiente[i][j + 1] + estadoSiguiente[i][j - 1] + estadoSiguiente[i - 1][j] + estadoSiguiente[i + 1][j] + estadoSiguiente[i + 1][j + 1] + estadoSiguiente[i + 1][j - 1] + estadoSiguiente[i - 1][j + 1] + estadoSiguiente[i - 1][j - 1];
-                // celuola estado siguiente
-                // regla a)
+                // celula estado siguiente
                 if(cel == 1 && (vecinos == 2 || vecinos == 3)){
                     estadoSiguiente[i][j] = 1;
-                // regla b)
+                
                 } else if(cel == 0 && vecinos == 3){
                     estadoSiguiente[i][j] = 1;
-                // regla c)
+                
                 } else{
                     estadoSiguiente[i][j] = 0;
                 }
@@ -92,49 +91,14 @@ public class Tablero{
         String cadena = "";
         for(int i = 0; i < DIMENSION; i++){
             for(int j = 0; j < DIMENSION; j++){
-             if(estadoActual[i][j] == 1){
-                cadena += "1";
-            } else{
+             if(estadoActual[i][j] == 0){
                 cadena += "0";
+            } else{
+                cadena += "1";
                 }
-            cadena += "";
             }
+            cadena += "\n";
         }
         return cadena;
     }
 }
-
-
-
-/*  
-for(int i = 0; i < estadoActual.length; i++){
-            for(int j = 0; j < estadoActual[0].length; j++){
-                int vecinosVivos = contarVecinosVivos(i, j);
-                if(estadoActual[i][j] == 1 && (vecinosVivos == 2 || vecinosVivos == 3))
-                    estadoSiguiente[i][j] = 1;
-                else if(estadoActual[i][j] == 0 && vecinosVivos == 3)
-                    estadoSiguiente[i][j] = 1;
-                else
-                    estadoSiguiente[i][j] = 0;
-            }
-        }
-        estadoActual = estadoSiguiente;
-        estadoSiguiente = new int[DIMENSION][DIMENSION];
-    }
-
-    public int contarVecinosVivos(int fila, int columna){
-        int vecinosVivos = 0;
-        for(int i = -1; i <= 1; i++){
-            for(int j = -1; j <= 1; j++){
-                int filaVecino = fila + i;
-                int columnaVecino = columna + j;
-                if(filaVecino >= 0 && filaVecino < DIMENSION && columnaVecino >= 0 && columnaVecino < DIMENSION && !(i == 0 && j == 0)){
-                    vecinosVivos += estadoActual[filaVecino][columnaVecino];
-                }
-            }
-        }
-        return vecinosVivos;
-    }
-
-
- */
